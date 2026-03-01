@@ -1,10 +1,10 @@
-import requests
-from fastapi import FastAPI
+from setting import setting
+from models import RatesResponse
+from observers.console_printer import ConsolePrinterObserver
+from observers.rate_alert import RateAlertObserver
 
+rate = RatesResponse(base="USD", updated_utc=None, rates={"TJS": 11, "RUB": 81})
 
-app = FastAPI()
+ConsolePrinterObserver(("TJS", "RUB")).update(rate)
 
-@app.get("/currency")
-async def get_currency():
-    r = requests.get("https://open.er-api.com/v6/latest/USD")
-    return r.text
+RateAlertObserver(setting.thresholds).update(rate)

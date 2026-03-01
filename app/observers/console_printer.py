@@ -1,10 +1,11 @@
+from typing import Iterable
 from models import RatesResponse
 
 
 class ConsolePrinterObserver:
     """Prints selected rates to console in a readable format."""
 
-    def __init__(self, currencies: tuple[str, ...]) -> None:
+    def __init__(self, currencies: Iterable[str]) -> None:
         self._currencies = currencies
 
     def update(self, data: RatesResponse) -> None:
