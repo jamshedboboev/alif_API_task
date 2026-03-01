@@ -1,0 +1,22 @@
+api:
+  url: "https://open.er-api.com/v6/latest/USD"
+  timeout_seconds: 5
+
+rates:
+  base_currency: "USD"
+  currencies:
+    - "TJS"
+    - "RUB"
+    - "EUR"
+  interval_seconds: 60
+
+thresholds:
+  TJS:
+    min: 9.0
+    max: 10.0
+  RUB:
+    min: 70.0
+    max: 80.0
+  EUR:
+    min: 0.8
+    max: 0.9
