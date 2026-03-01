@@ -1,8 +1,10 @@
+import time
 import requests
 
 from typing import Iterable
 
 from .models import RatesResponse
+from .setting import setting
 
 
 class RateClient:
@@ -10,12 +12,12 @@ class RateClient:
     Клиент для получения курсов валют из ExchangeRate-API.
     """
 
-    def __init__(self, url: str, timeout: float = 5.0):
+    def __init__(self, url: str, timeout: float):
         self._url = url
         self._timeout = timeout
         self._session = requests.Session()
 
-    def get_rates(self, symbols: Iterable[str] = ("TJS", "RUB", "EUR"), base: str = "USD") -> RatesResponse:
+    def get_rates(self, symbols: Iterable[str] = setting.rates.currencies, base: str = setting.rates.base_currency) -> RatesResponse:
         """
         Получает курсы заданных валют относительно base.
 
@@ -26,9 +28,18 @@ class RateClient:
         if not symbols_set:
             raise ValueError("symbols должен содержать хотя бы одну валюту")
 
-        resp = self._session.get(self._url, timeout=self._timeout)
-        resp.raise_for_status()
-        data = resp.json()
+        for i in range(3):
+            try:
+                resp = self._session.get(self._url, timeout=self._timeout)
+                break  # если запрос успешен — выходим из цикла
+            except requests.RequestException as e:
+                if i < 2:
+                    time.sleep(1)
+                else:
+                    raise RuntimeError(f"API недоступен после 3 попыток: {e}") from e
+                
+        resp.raise_for_status()  # type:ignore
+        data = resp.json()       # type:ignore
 
         base_code = data["base_code"]
         if base_code != base:
@@ -47,4 +58,4 @@ class RateClient:
             rates=filtered_rates,
         )
     
-rate_client = RateClient("https://open.er-api.com/v6/latest/USD")
+rate_client = RateClient(str(setting.api.url), setting.api.timeout_seconds)
