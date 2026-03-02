@@ -16,7 +16,7 @@ async def test_notify_calls_all_observers():
     subject.attach(o1)
     subject.attach(o2)
 
-    data = RatesResponse(base="USD", updated_utc="x", rates={"TJS": 10.0})
+    data = RatesResponse(base="USD", updated_utc="x", rates={"TJS": 9.4})
 
     await subject.notify(data)
 
@@ -35,7 +35,7 @@ async def test_notify_does_not_stop_if_one_observer_fails():
     subject.attach(bad)
     subject.attach(ok)
 
-    data = RatesResponse(base="USD", updated_utc="x", rates={"TJS": 10.0})
+    data = RatesResponse(base="USD", updated_utc="x", rates={"TJS": 9.4})
 
     await subject.notify(data)
 

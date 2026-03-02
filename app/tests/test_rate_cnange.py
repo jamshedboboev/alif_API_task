@@ -13,7 +13,7 @@ async def test_change_percent_first_update_no_reaction(monkeypatch):
 
     obs = RateChangePercentObserver(threshold_percent=5.0)
 
-    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 10.0}))
+    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 9.0}))
     assert warn.call_count == 0
 
 
@@ -24,8 +24,8 @@ async def test_change_percent_below_threshold_no_reaction(monkeypatch):
 
     obs = RateChangePercentObserver(threshold_percent=5.0)
 
-    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 10.0}))
-    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 10.4}))
+    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 9.0}))
+    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 9.4}))
 
     assert warn.call_count == 0
 
@@ -37,7 +37,7 @@ async def test_change_percent_above_threshold_reacts(monkeypatch):
 
     obs = RateChangePercentObserver(threshold_percent=5.0)
 
-    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 10.0}))
-    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 10.6}))
+    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 9.0}))
+    await obs.update(RatesResponse(base="USD", updated_utc="x", rates={"TJS": 9.6}))
 
     assert warn.call_count == 1

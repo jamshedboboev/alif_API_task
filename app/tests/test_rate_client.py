@@ -112,7 +112,7 @@ async def test_get_rates_retries_then_success(monkeypatch):
         return_value={
             "base_code": "USD",
             "time_last_update_utc": "x",
-            "rates": {"TJS": 10.5},
+            "rates": {"TJS": 9.5},
         }
     )
 
