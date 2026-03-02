@@ -20,3 +20,5 @@ thresholds:
   EUR:
     min: 0.8
     max: 0.9
+
+change_percent_threshold: 1.5
