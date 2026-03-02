@@ -62,6 +62,11 @@ class AppConfig(BaseModel):
     rates: RatesConfig
     thresholds: dict[str, Threshold] = Field(default_factory=dict)
 
+    change_percent_threshold: float = Field(
+        ...,
+        description="Процентное изменение, необходимое для срабатывания наблюдателя изменения ставки"
+    )
+
     @field_validator("thresholds")
     @classmethod
     def normalize_threshold_keys(cls, v: dict[str, Threshold]) -> dict[str, Threshold]:
