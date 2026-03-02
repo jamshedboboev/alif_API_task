@@ -3,8 +3,8 @@ import requests
 
 from typing import Iterable
 
-from .models import RatesResponse
-from .setting import setting
+from models import RatesResponse
+from setting import setting
 
 
 class RateClient:
