@@ -1,5 +1,5 @@
 import asyncio
-from typing import Iterable, Optional
+from typing import Iterable
 
 import aiohttp
 from loguru import logger
@@ -12,13 +12,12 @@ class RateClient:
     """
     Асинхронный клиент для получения курсов валют из ExchangeRate-API.
     """
-
     def __init__(self, url: str, timeout: float):
         self._url = url
         self._timeout = timeout
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session: aiohttp.ClientSession | None = None
 
-        logger.debug("RateClient инициализирован: url={}, timeout={}", url, timeout)
+        logger.debug("RateClient инициализирован.")
 
     async def _get_session(self) -> aiohttp.ClientSession:
         """
@@ -27,7 +26,6 @@ class RateClient:
         if self._session is None or self._session.closed:
             timeout = aiohttp.ClientTimeout(total=self._timeout)
             self._session = aiohttp.ClientSession(timeout=timeout)
-            logger.debug("Создана новая aiohttp ClientSession")
         return self._session
 
     async def aclose(self) -> None:
@@ -61,19 +59,13 @@ class RateClient:
             logger.error("Передан пустой список symbols")
             raise ValueError("symbols должен содержать хотя бы одну валюту")
 
-        logger.info(
-            "Запрос курсов валют: base={}, symbols={}",
-            base,
-            sorted(symbols_set),
-        )
+        logger.info(f"Запрос курсов валют: base={base}, symbols={sorted(symbols_set)}")
 
         session = await self._get_session()
 
-        last_exc: Optional[BaseException] = None
-
         for attempt in range(1, 4):
             try:
-                logger.debug("Попытка запроса к API №{}", attempt)
+                logger.debug(f"Попытка запроса к API №{attempt}")
 
                 async with session.get(self._url) as resp:
                     resp.raise_for_status()
@@ -83,12 +75,7 @@ class RateClient:
                 break
 
             except (aiohttp.ClientError, asyncio.TimeoutError) as e:
-                last_exc = e
-                logger.warning(
-                    "Ошибка при обращении к API (попытка {}): {}",
-                    attempt,
-                    str(e),
-                )
+                logger.warning(f"Ошибка при обращении к API (попытка {attempt}): {e}")
 
                 if attempt < 3:
                     await asyncio.sleep(1)
@@ -100,11 +87,7 @@ class RateClient:
 
         base_code = data["base_code"]
         if base_code != base:
-            logger.error(
-                "Несоответствие base: ожидалось {}, получено {}",
-                base,
-                base_code,
-            )
+            logger.error(f"Несоответствие base: ожидалось {base}, получено {base_code}")
             raise ValueError(
                 f"Ожидалось base={base}, но API вернул base_code={base_code}"
             )
@@ -112,16 +95,13 @@ class RateClient:
         rates = data.get("rates", {})
         missing = [code for code in symbols_set if code not in rates]
         if missing:
-            logger.error("В ответе API отсутствуют валюты: {}", missing)
+            logger.error(f"В ответе API отсутствуют валюты: {missing}")
             raise KeyError(f"В ответе API отсутствуют валюты: {missing}")
 
         filtered_rates = {code: float(rates[code]) for code in symbols_set}
 
         logger.info(
-            "Курсы успешно получены. base={}, updated={}, currencies={}",
-            base_code,
-            data.get("time_last_update_utc"),
-            list(filtered_rates.keys()),
+            f"Курсы успешно получены. base={base_code}, updated={data.get('time_last_update_utc')}, currencies={list(filtered_rates.keys())}"
         )
 
         return RatesResponse(

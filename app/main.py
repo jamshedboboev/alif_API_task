@@ -1,3 +1,7 @@
+import asyncio
+
+from loguru import logger
+
 from setting import setting
 from clients import rate_client
 from service import Observable
@@ -5,8 +9,7 @@ from observers.console_printer import ConsolePrinterObserver
 from observers.rate_alert import RateAlertObserver
 
 
-def main() -> None:
-    client = rate_client.get_rates()
+async def main() -> None:
     subject = Observable()
 
     # 1) Наблюдатель, который выводит курсы
@@ -15,9 +18,12 @@ def main() -> None:
     # 2) Наблюдатель, который предупреждает по порогу
     subject.attach(RateAlertObserver(setting.thresholds))
 
-    # Получаем данные и уведомляем наблюдателей
-    subject.notify(client)
+    logger.debug("Запрашиваем курсы валют...")
+    client = await rate_client.get_rates()
+
+    logger.debug("Уведомляем наблюдателей...")
+    await subject.notify(client)
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
